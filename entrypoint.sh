@@ -4,9 +4,8 @@
 # Optional: Add any setup logic here
 echo "Starting the container..."
 
-# Optional: Print environment variables for debugging
-echo "Environment variables:"
-env
+echo "Starting SSH server..."
+service ssh start
 
 # Run the .NET application
 echo "Running the .NET application..."

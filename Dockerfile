@@ -1,5 +1,5 @@
 # Base stage using Debian for runtime
-FROM debian:bookworm AS base
+FROM debian:bookworm-slim AS base
 
 # Install dependencies for running .NET applications (curl and other necessary packages)
 RUN apt-get update \
