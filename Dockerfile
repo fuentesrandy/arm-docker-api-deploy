@@ -5,15 +5,20 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 USER app
 # Install SSH server
 COPY sshd_config /etc/ssh/sshd_config
-RUN apt update \
-&& apt install -y --no-install-recommends openssh-server \
-&& mkdir -p /run/sshd \
-&& echo "root:Docker!" | chpasswd
+# Install OpenSSH server
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends openssh-server \
+    && mkdir -p /run/sshd \
+    && echo 'root:Docker!' | chpasswd \
+    && sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config \
+    && sed -i 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' /etc/pam.d/sshd \
+    && echo "export VISIBLE=now" >> /etc/profile
 
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 EXPOSE 2222
+EXPOSE 22
 
 
 # This stage is used to build the service project
@@ -35,4 +40,5 @@ RUN dotnet publish "./ARM-Docker-Api-Deploy.csproj" -c $BUILD_CONFIGURATION -o /
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+CMD service ssh start
 ENTRYPOINT ["dotnet", "ARM-Docker-Api-Deploy.dll"]
