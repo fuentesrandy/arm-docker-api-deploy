@@ -1,5 +1,5 @@
 # Base stage using Debian for runtime
-FROM debian:bullseye-slim AS base
+FROM debian:bookworm AS base
 
 # Install dependencies for running .NET applications (curl and other necessary packages)
 RUN apt-get update \
@@ -8,17 +8,16 @@ RUN apt-get update \
     ca-certificates \
     apt-transport-https \
     gnupg \
+    && apt-get install -y --no-install-recommends dialog \
+    && apt-get install -y --no-install-recommends openssh-server \
+    && echo "root:Docker!" | chpasswd \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* 
 
 # Install the .NET runtime
 RUN curl -sSL https://dotnet.microsoft.com/download/dotnet/scripts/v1/dotnet-install.sh | bash /dev/stdin --channel 8.0 --install-dir /usr/share/dotnet \
     && ln -s /usr/share/dotnet/dotnet /usr/bin/dotnet
 
-# Start and enable SSH
-RUN apt-get install -y --no-install-recommends dialog \
-    && apt-get install -y --no-install-recommends openssh-server \
-    && echo "root:Docker!" | chpasswd 
 
 COPY sshd_config /etc/ssh/
 
@@ -52,8 +51,4 @@ RUN dotnet publish "./ARM-Docker-Api-Deploy.csproj" -c $BUILD_CONFIGURATION -o /
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-
-
-
-
 ENTRYPOINT [ "./entrypoint.sh" ] 
