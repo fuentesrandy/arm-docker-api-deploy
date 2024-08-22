@@ -47,9 +47,5 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 
-# Copy the entrypoint script
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
-# Set the entrypoint to start both SSH and the app
-ENTRYPOINT ["/entrypoint.sh"]
+# Entry point to run the .NET application
+ENTRYPOINT ["dotnet", "ARM-Docker-Api-Deploy.dll"]
