@@ -18,6 +18,7 @@ RUN apt-get update \
 
 # Set up SSH to run in the background
 EXPOSE 22
+EXPOSE 2222
 CMD service ssh start && tail -f /dev/null
 
 # Set the non-root user and working directory for your app
@@ -46,5 +47,9 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 
-# Entry point to run the .NET application
-ENTRYPOINT ["dotnet", "ARM-Docker-Api-Deploy.dll"]
+# Copy the entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# Set the entrypoint to start both SSH and the app
+ENTRYPOINT ["/entrypoint.sh"]
