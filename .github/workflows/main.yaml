@@ -42,5 +42,5 @@ jobs:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
           resourceGroupName: ${{ vars.AZURE_RG }}
           template: ./Azure/deploy.json
-          parameters: apiName=armdockerapi dockerImageName=${{ vars.REGISTRY_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.TAG }} REGISTRY_LOGIN_SERVER=${{ vars.REGISTRY_LOGIN_SERVER }} REGISTRY_PASSWORD=${{ secrets.REGISTRY_PASSWORD }}
+          parameters: apiName=armdockerapi dockerImageName=${{ vars.REGISTRY_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.TAG }} REGISTRY_LOGIN_SERVER=${{ vars.REGISTRY_LOGIN_SERVER }} REGISTRY_PASSWORD=${{ secrets.REGISTRY_PASSWORD_ADMIN }}
 
