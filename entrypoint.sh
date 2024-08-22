@@ -1,10 +1,3 @@
 #!/bin/bash
-
-# Start the SSH server in the background
-service ssh start
-
-# Start the .NET application
-dotnet /app/ARM-Docker-Api-Deploy.dll
-
-# Keep the container running (optional if the app is not long-running)
-exec "$@"
+# Start supervisor, which will manage both the SSH server and the .NET app
+/usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf

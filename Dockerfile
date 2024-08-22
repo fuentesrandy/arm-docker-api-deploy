@@ -1,7 +1,7 @@
 # Base stage with SSH support
 FROM ubuntu:20.04 AS base
 
-# Install dependencies and OpenSSH server
+# Install dependencies, OpenSSH server, and supervisor
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
     openssh-server \
@@ -9,6 +9,7 @@ RUN apt-get update \
     ca-certificates \
     apt-transport-https \
     gnupg \
+    supervisor \
     && mkdir -p /run/sshd \
     && echo 'root:Docker!' | chpasswd \
     && sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config \
@@ -16,16 +17,13 @@ RUN apt-get update \
     && echo "export VISIBLE=now" >> /etc/profile \
     && apt-get clean
 
-# Set up SSH to run in the background
-EXPOSE 22
-EXPOSE 2222
-CMD service ssh start && tail -f /dev/null
+# Supervisor config for running SSH and .NET app
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Set the non-root user and working directory for your app
-USER app
+# Set working directory and expose necessary ports
 WORKDIR /app
-EXPOSE 8080
-EXPOSE 8081
+EXPOSE 80
+EXPOSE 2222
 
 # Build stage to compile the .NET project
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
@@ -42,10 +40,14 @@ FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./ARM-Docker-Api-Deploy.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
-# Final stage with SSH and .NET app running
+# Final stage with SSH and .NET app running under supervisor
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 
-# Entry point to run the .NET application
-ENTRYPOINT ["dotnet", "ARM-Docker-Api-Deploy.dll"]
+# Copy the entrypoint script (for supervisor)
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# Set entrypoint to start supervisord (runs both SSH and app)
+ENTRYPOINT ["/entrypoint.sh"]
