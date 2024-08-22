@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ARM-Docker-Api-Deploy")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5b631b882023f6f9c4361316a6226677e1f1d8d2")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+88971e9536fb294caa19d7f03947b7c2a1e90878")]
 [assembly: System.Reflection.AssemblyProductAttribute("ARM-Docker-Api-Deploy")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ARM-Docker-Api-Deploy")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
