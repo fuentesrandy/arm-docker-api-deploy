@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35219.272
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ARM-Docker-Api-Deploy", "ARM-Docker-Api-Deploy.csproj", "{041E246E-BE56-40AD-B975-22CC2768E97B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{041E246E-BE56-40AD-B975-22CC2768E97B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{041E246E-BE56-40AD-B975-22CC2768E97B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{041E246E-BE56-40AD-B975-22CC2768E97B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{041E246E-BE56-40AD-B975-22CC2768E97B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {71292B51-2234-4D32-9243-7CF00B8564E5}
+	EndGlobalSection
+EndGlobal

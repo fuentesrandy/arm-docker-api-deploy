@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "MFq9LPs6bpo=",
+  "success": true,
+  "projectFilePath": "C:\\code\\azure-poc-testing\\ARM-Docker-Api-Deploy\\ARM-Docker-Api-Deploy.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\randy\\.nuget\\packages\\microsoft.visualstudio.azure.containers.tools.targets\\1.21.0\\microsoft.visualstudio.azure.containers.tools.targets.1.21.0.nupkg.sha512"
+  ],
+  "logs": []
+}

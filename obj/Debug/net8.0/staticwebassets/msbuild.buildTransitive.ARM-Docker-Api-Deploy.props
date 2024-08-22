@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\buildMultiTargeting\ARM-Docker-Api-Deploy.props" />
+</Project>

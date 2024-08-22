@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "rSyB2D/fWtjaO+zTza5W9P1rJNuVk/iJsZ1+sPFuUaU=",
+  "Source": "ARM-Docker-Api-Deploy",
+  "BasePath": "_content/ARM-Docker-Api-Deploy",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

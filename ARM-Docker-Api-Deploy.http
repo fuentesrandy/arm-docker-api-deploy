@@ -1,0 +1,6 @@
+@ARM_Docker_Api_Deploy_HostAddress = http://localhost:5276
+
+GET {{ARM_Docker_Api_Deploy_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
