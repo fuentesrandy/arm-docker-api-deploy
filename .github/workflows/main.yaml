@@ -1,0 +1,46 @@
+name: Deploy Api
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+env:
+  DOTNET_VERSION: "8.0.x"
+  IMAGE_NAME: arm-docker-api
+  TAG: latest
+
+jobs:
+  build-and-deploy-backend:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout master
+      - uses: actions/checkout@master
+
+        # Log into Azure
+      - uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: "Build and push image"
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ vars.REGISTRY_LOGIN_SERVER }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+      - run: |
+          docker build . -t ${{ vars.REGISTRY_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.TAG }} -f ./Dockerfile
+          docker push ${{ vars.REGISTRY_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}
+
+      # Deploy ARM template
+      - name: Run ARM deploy
+        id: arm_deploy
+        uses: azure/arm-deploy@v1
+        with:
+          #additionalArguments:
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
+          resourceGroupName: ${{ vars.AZURE_RG }}
+          template: ./Azure/deploy.json
+          parameters: apiName=armdockerapi dockerImageName=${{ vars.REGISTRY_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.TAG }} REGISTRY_LOGIN_SERVER=${{ vars.REGISTRY_LOGIN_SERVER }} REGISTRY_PASSWORD=${{ secrets.REGISTRY_PASSWORD }}
+

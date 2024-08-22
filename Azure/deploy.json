@@ -1,0 +1,111 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+
+    "parameters": {
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "The location."
+            }
+        },
+        "apiName": {
+            "type": "String"
+        },
+        "dockerImageName": {
+            "type": "String"
+        },
+        "REGISTRY_LOGIN_SERVER": {
+            "type": "String"
+        },
+        "REGISTRY_PASSWORD": {
+            "type": "String"
+        }
+    },
+    "variables": {
+        "acrName": "amspocacr",
+        "hostingPlanName": "[concat('hostingplan', uniqueString(resourceGroup().id))]",
+        "apiServerName": "[concat('api', parameters('apiName'), uniqueString(resourceGroup().id))]",
+        "apiStartupCommand": "dotnet ARM-Docker-Api-Deploy.dll"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2023-01-01",
+            "name": "[variables('hostingPlanName')]",
+            "location": "[parameters('location')]",
+            "kind": "linux",
+            "tags": {
+                "displayName": "HostingPlan"
+            },
+            "sku": {
+                "name": "F1",
+                "capacity": 1
+            },
+            "properties": {
+                "name": "[variables('hostingPlanName')]",
+                "numberOfWorkers": "1",
+                "reserved": true // must set when adding prop for ACR Docker Image
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites",
+            "kind": "app,linux,container",
+            "apiVersion": "2023-01-01",
+            "name": "[variables('apiServerName')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverFarms/', variables('hostingPlanName'))]"
+            ],
+            "tags": {
+                "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', variables('hostingPlanName'))]": "empty",
+                "displayName": "Website"
+            },
+            "properties": {
+                "name": "[variables('apiServerName')]",
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
+                "applicationLogs": {
+                    "fileSystem": {
+                        "level": "Verbose", // Set log level (Off, Verbose, Information, Warning, Error)
+                        "retentionInMb": 35, // The maximum size of log files (in MB)
+                        "retentionInDays": 3 // Retain logs for this many days
+                    },
+                    "httpLogs": {
+                        "fileSystem": {
+                            "retentionInMb": 35,
+                            "retentionInDays": 3,
+                            "enabled": true
+                        }
+                    }
+                },
+                "siteConfig": {
+                    "logsDirectorySizeLimit": 35, // Optional: The limit for the size of the log directory (in MB)
+                    "retentionInDays": 3, // Optional: The number of days to keep the logs
+                    "detailedErrorLoggingEnabled": true, // Enable detailed error logging
+                    "httpLoggingEnabled": true, // Enable HTTP logging
+                    "requestTracingEnabled": true, // Enable request tracing
+                    "linuxFxVersion": "[concat('DOCKER|', parameters('dockerImageName'))]", // this will pull from ACR
+                    //"alwaysOn": true,
+                    "appCommandLine": "[variables('apiStartupCommand')]"
+                }
+            },
+            "resources": [
+                {
+                    "type": "config",
+                    "apiVersion": "2023-01-01",
+                    "name": "appsettings",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Web/Sites/', variables('apiServerName'))]",
+                        "[resourceId('Microsoft.ContainerRegistry/registries/', variables('acrName'))]"
+                    ],
+                    "properties": {
+                        "DOCKER_REGISTRY_SERVER_URL": "[parameters('REGISTRY_LOGIN_SERVER')]",
+                        "DOCKER_REGISTRY_SERVER_USERNAME": "[variables('acrName')]",
+                        "DOCKER_REGISTRY_SERVER_PASSWORD": "[parameters('REGISTRY_PASSWORD')]"
+                    }
+                }
+            ]
+        }
+    ]
+}
