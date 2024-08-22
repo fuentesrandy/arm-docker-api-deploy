@@ -1,29 +1,37 @@
-# Base stage with SSH support
-FROM ubuntu:20.04 AS base
+# Base stage using Debian for runtime
+FROM debian:bullseye-slim AS base
 
-# Install dependencies, OpenSSH server, and supervisor
+# Install dependencies for running .NET applications (curl and other necessary packages)
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-    openssh-server \
     curl \
     ca-certificates \
     apt-transport-https \
     gnupg \
-    supervisor \
-    && mkdir -p /run/sshd \
-    && echo 'root:Docker!' | chpasswd \
-    && sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config \
-    && sed -i 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' /etc/pam.d/sshd \
-    && echo "export VISIBLE=now" >> /etc/profile \
-    && apt-get clean
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Supervisor config for running SSH and .NET app
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+# Install the .NET runtime
+RUN curl -sSL https://dotnet.microsoft.com/download/dotnet/scripts/v1/dotnet-install.sh | bash /dev/stdin --channel 8.0 --install-dir /usr/share/dotnet \
+    && ln -s /usr/share/dotnet/dotnet /usr/bin/dotnet
 
-# Set working directory and expose necessary ports
+# Start and enable SSH
+RUN apt-get install -y --no-install-recommends dialog \
+    && apt-get install -y --no-install-recommends openssh-server \
+    && echo "root:Docker!" | chpasswd 
+
+COPY sshd_config /etc/ssh/
+
 WORKDIR /app
-EXPOSE 80
+EXPOSE 8080 
+EXPOSE 8081
 EXPOSE 2222
+
+# Copy the entrypoint script to the container
+COPY entrypoint.sh ./
+
+# Ensure the entrypoint script is executable
+RUN chmod u+x ./entrypoint.sh
 
 # Build stage to compile the .NET project
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
@@ -35,19 +43,17 @@ COPY . .
 WORKDIR "/src/."
 RUN dotnet build "./ARM-Docker-Api-Deploy.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
-# Publish stage to publish the .NET project
+# Publish stage to produce optimized output
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./ARM-Docker-Api-Deploy.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
-# Final stage with SSH and .NET app running under supervisor
+# Final stage using Debian to run the application
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 
-# Copy the entrypoint script (for supervisor)
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
 
-# Set entrypoint to start supervisord (runs both SSH and app)
-ENTRYPOINT ["/entrypoint.sh"]
+
+
+ENTRYPOINT [ "./entrypoint.sh" ] 

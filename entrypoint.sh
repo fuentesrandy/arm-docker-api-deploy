@@ -1,3 +1,15 @@
 #!/bin/bash
-# Start supervisor, which will manage both the SSH server and the .NET app
-/usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
+# entrypoint.sh
+
+# Optional: Add any setup logic here
+echo "Starting the container..."
+
+# Optional: Print environment variables for debugging
+echo "Environment variables:"
+env
+
+# Run the .NET application
+echo "Running the .NET application..."
+exec dotnet /app/ARM-Docker-Api-Deploy.dll
+
+# The 'exec' command replaces the shell with the .NET app, ensuring that the app gets signal handling correctly
