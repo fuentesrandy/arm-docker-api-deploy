@@ -4,12 +4,11 @@
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 USER app
 # Install SSH server
-COPY sshd_config /etc/ssh/
-RUN apk add openssh \
-     && echo "root:Docker!" | chpasswd \
-     && chmod +x /app/init_container.sh \
-     && cd /etc/ssh/ \
-     && ssh-keygen -A
+COPY sshd_config /etc/ssh/sshd_config
+RUN apt update \
+&& apt install -y --no-install-recommends openssh-server \
+&& mkdir -p /run/sshd \
+&& echo "root:Docker!" | chpasswd
 
 WORKDIR /app
 EXPOSE 8080
