@@ -1,27 +1,32 @@
-# See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
+# Base stage with SSH support
+FROM ubuntu:20.04 AS base
 
-# This stage is used when running from VS in fast mode (Default for Debug configuration)
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-USER app
-# Install SSH server
-COPY sshd_config /etc/ssh/sshd_config
-# Install OpenSSH server
+# Install dependencies and OpenSSH server
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends openssh-server \
+    && apt-get install -y --no-install-recommends \
+    openssh-server \
+    curl \
+    ca-certificates \
+    apt-transport-https \
+    gnupg \
     && mkdir -p /run/sshd \
     && echo 'root:Docker!' | chpasswd \
     && sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config \
     && sed -i 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' /etc/pam.d/sshd \
-    && echo "export VISIBLE=now" >> /etc/profile
+    && echo "export VISIBLE=now" >> /etc/profile \
+    && apt-get clean
 
+# Set up SSH to run in the background
+EXPOSE 22
+CMD service ssh start && tail -f /dev/null
+
+# Set the non-root user and working directory for your app
+USER app
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
-EXPOSE 2222
-EXPOSE 22
 
-
-# This stage is used to build the service project
+# Build stage to compile the .NET project
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
@@ -31,14 +36,15 @@ COPY . .
 WORKDIR "/src/."
 RUN dotnet build "./ARM-Docker-Api-Deploy.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
-# This stage is used to publish the service project to be copied to the final stage
+# Publish stage to publish the .NET project
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./ARM-Docker-Api-Deploy.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
-# This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
+# Final stage with SSH and .NET app running
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-CMD service ssh start
+
+# Entry point to run the .NET application
 ENTRYPOINT ["dotnet", "ARM-Docker-Api-Deploy.dll"]
