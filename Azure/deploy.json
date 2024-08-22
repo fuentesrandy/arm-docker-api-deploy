@@ -85,8 +85,8 @@
                     "detailedErrorLoggingEnabled": true, // Enable detailed error logging
                     "httpLoggingEnabled": true, // Enable HTTP logging
                     "requestTracingEnabled": true, // Enable request tracing
-                    "linuxFxVersion": "[concat('DOCKER|', parameters('dockerImageName'))]" // this will pull from ACR
-                    //"alwaysOn": true,
+                    "linuxFxVersion": "[concat('DOCKER|', parameters('dockerImageName'))]", // this will pull from ACR
+                    "alwaysOn": true
 
                 }
             },
