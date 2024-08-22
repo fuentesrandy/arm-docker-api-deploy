@@ -26,8 +26,7 @@
     "variables": {
         "acrName": "amspocacr",
         "hostingPlanName": "[concat('hostingplan', uniqueString(resourceGroup().id))]",
-        "apiServerName": "[concat('api', parameters('apiName'), uniqueString(resourceGroup().id))]",
-        "apiStartupCommand": "dotnet ARM-Docker-Api-Deploy.dll"
+        "apiServerName": "[concat('api', parameters('apiName'), uniqueString(resourceGroup().id))]"
     },
     "resources": [
         {
@@ -81,7 +80,6 @@
                 },
                 "siteConfig": {
                     "logsDirectorySizeLimit": 35, // Optional: The limit for the size of the log directory (in MB)
-                    "retentionInDays": 3, // Optional: The number of days to keep the logs
                     "detailedErrorLoggingEnabled": true, // Enable detailed error logging
                     "httpLoggingEnabled": true, // Enable HTTP logging
                     "requestTracingEnabled": true, // Enable request tracing
