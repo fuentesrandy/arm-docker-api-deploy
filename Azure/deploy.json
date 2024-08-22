@@ -96,8 +96,7 @@
                     "apiVersion": "2023-01-01",
                     "name": "appsettings",
                     "dependsOn": [
-                        "[resourceId('Microsoft.Web/Sites/', variables('apiServerName'))]",
-                        "[resourceId('Microsoft.ContainerRegistry/registries/', variables('acrName'))]"
+                        "[resourceId('Microsoft.Web/Sites/', variables('apiServerName'))]"
                     ],
                     "properties": {
                         "DOCKER_REGISTRY_SERVER_URL": "[parameters('REGISTRY_LOGIN_SERVER')]",
