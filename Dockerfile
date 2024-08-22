@@ -1,6 +1,7 @@
 # Base stage using Debian for runtime
 FROM debian:bookworm-slim AS base
 
+#ENV ASPNETCORE_URLS=http://+:8080
 # Install dependencies for running .NET applications (curl and other necessary packages)
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
