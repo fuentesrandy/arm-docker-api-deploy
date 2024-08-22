@@ -8,8 +8,9 @@ RUN apt-get update \
     ca-certificates \
     apt-transport-https \
     gnupg \
-    && apt-get install -y --no-install-recommends dialog \
-    && apt-get install -y --no-install-recommends openssh-server \
+    libicu72 \
+    dialog \
+    openssh-server \
     && echo "root:Docker!" | chpasswd \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* 
